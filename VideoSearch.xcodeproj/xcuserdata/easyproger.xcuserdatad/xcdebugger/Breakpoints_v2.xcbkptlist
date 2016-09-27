@@ -64,7 +64,7 @@
             startingLineNumber = "826"
             endingLineNumber = "826"
             landmarkName = "-analyzeResultsShowTag:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -80,7 +80,7 @@
             startingLineNumber = "626"
             endingLineNumber = "626"
             landmarkName = "-readyToSendData:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -96,7 +96,7 @@
             startingLineNumber = "643"
             endingLineNumber = "643"
             landmarkName = "-readyToSendData:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -112,7 +112,7 @@
             startingLineNumber = "662"
             endingLineNumber = "662"
             landmarkName = "-readyToSendData:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -128,7 +128,7 @@
             startingLineNumber = "627"
             endingLineNumber = "627"
             landmarkName = "-readyToSendData:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -144,7 +144,7 @@
             startingLineNumber = "612"
             endingLineNumber = "612"
             landmarkName = "-preocessFileEnd"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -160,7 +160,7 @@
             startingLineNumber = "51"
             endingLineNumber = "51"
             landmarkName = "-viewDidLoad"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -176,7 +176,7 @@
             startingLineNumber = "87"
             endingLineNumber = "87"
             landmarkName = "-authComplete:refreshToken:userName:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -208,7 +208,7 @@
             startingLineNumber = "520"
             endingLineNumber = "520"
             landmarkName = "-compressVideo:location:urlToPlay:type:isLocalIdentifer:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -224,7 +224,7 @@
             startingLineNumber = "757"
             endingLineNumber = "757"
             landmarkName = "-showTag:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -256,7 +256,7 @@
             startingLineNumber = "355"
             endingLineNumber = "355"
             landmarkName = "-assetsPickerController:didFinishPickingAssets:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -272,7 +272,7 @@
             startingLineNumber = "311"
             endingLineNumber = "311"
             landmarkName = "-assetsPickerController:didFinishPickingAssets:"
-            landmarkType = "5">
+            landmarkType = "7">
             <Locations>
                <Location
                   shouldBeEnabled = "No"
@@ -320,7 +320,7 @@
             startingLineNumber = "293"
             endingLineNumber = "293"
             landmarkName = "-assetsPickerController:didFinishPickingAssets:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

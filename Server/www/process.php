@@ -99,7 +99,7 @@ $imagesToSend = scanDirectories("uploads",array("jpg","png"));
 
 $type = "LABEL_DETECTION";
 $base64 = "";
-$api_key = "AIzaSyDjtqbhoOF9OmcDsAdZEye-til0nyh5BQI";
+$api_key = "AIzaSyDKLmKhpFtbEvfWWqwfzMnDbpMkOQOBcnY";
 $cvurl = 'https://vision.googleapis.com/v1/images:annotate?key=' . $api_key;
 
 $count = count($imagesToSend);
