@@ -25,6 +25,12 @@ SET time_zone = "+00:00";
 --
 -- Структура таблицы `filesNames`
 -- хранение имен файлов 
+-- ID айди записи 
+-- nameFile имя ресурса ( путь или локальный идентификатор ) 
+-- userID айди пользователя которому принадлежит ресурс 
+-- location данные о месте где создан ресурс 
+-- type локальный или удаленный источник 
+-- isLocalIdentifer локальный ли идентификатор в nameFile 
 
 CREATE TABLE IF NOT EXISTS `filesNames` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -185,6 +191,9 @@ CREATE TABLE IF NOT EXISTS `oauth_users` (
 --
 -- Структура таблицы `uniqueGroups`
 -- хранение уникальных групп по строкам 
+-- ID айди записи 
+-- tags теги в строке 
+-- база нужна для того чтобы искать уже существубщие группы тегов дабы не добавлять такие же 
 
 CREATE TABLE IF NOT EXISTS `uniqueGroups` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
