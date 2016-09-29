@@ -160,7 +160,7 @@ function pushFiles() {
 
 }
 
-// дебаг метод 
+// проверка валидности ассестокена и рефреш токена
 function testAuth() {
     // and question )
     /* @var Server $server */
