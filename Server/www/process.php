@@ -16,7 +16,7 @@ $JSON = new Services_JSON();
 
 
 set_time_limit(0);
-
+// метод сканирования директории 
 function scanDirectories($rootDir,$fileFind=null, $allData=array()) {
     // set filenames invisible if you want
     $invisibleFileNames = array(".", "..", ".htaccess", ".htpasswd",".DS_Store");
@@ -29,7 +29,7 @@ function scanDirectories($rootDir,$fileFind=null, $allData=array()) {
             // if content is file & readable, add to array
             if(is_file($path) && is_readable($path)) {
                 // save file name with path
-
+// ограничение на 100 файлов для отпрваки в гугл 
                 if (count($allData) > 100) return $allData;
 
                 if ($fileFind) {
@@ -55,7 +55,7 @@ function scanDirectories($rootDir,$fileFind=null, $allData=array()) {
     }
     return $allData;
 }
-
+// метод обработки видео через ffmpeg 
 function processVideo($videofile) {
 
     $pathInfo = pathinfo($videofile);
@@ -65,7 +65,7 @@ function processVideo($videofile) {
     $dirName  = $pathInfo["dirname"];
     $fileName = $pathInfo["basename"];
 
-
+//получаем изображение 5 кадров в секунду 
     $videofile = "http://".$_SERVER[HTTP_HOST]."/".$videofile;
     $command = 'ffmpeg -i '.$videofile.' -r 5/1 '.$dirName.'/'.$fileName.'_%03d.jpg';
 
@@ -78,7 +78,7 @@ function processVideo($videofile) {
 
 
 $videos = scanDirectories("uploads",array("mp4","mov"));
-
+// ограничеваем анализ на одно видео за раз 
 if (count($videos)) {
 
     processVideo($videos[0]);
@@ -91,7 +91,7 @@ if (count($videos)) {
 */
 };
 
-
+// сканируем изображения 
 $imagesToSend = scanDirectories("uploads",array("jpg","png"));
 
 
@@ -104,7 +104,7 @@ $cvurl = 'https://vision.googleapis.com/v1/images:annotate?key=' . $api_key;
 
 $count = count($imagesToSend);
 
-
+// если папка с изображениями пустая мы можем подчистить текстовые файлы
 if (!$count) {
     $txtToRemove = scanDirectories("uploads",array("txt"));
     for ($i = 0; $i < count($txtToRemove);$i++) {
@@ -112,11 +112,11 @@ if (!$count) {
     }
 }
 
-
+// разбивка на блоки по 15 фотографий 
 for ($i = 0; $i < ceil($count/15);$i++) {
 
    // sleep(1);
-
+// формирования запроса 
     $request_json = '
             {
                 "requests": [';
@@ -126,12 +126,13 @@ for ($i = 0; $i < ceil($count/15);$i++) {
 
     $indexStart = $i*15;
 
+    // дабы не выходить за рамки массива мы проверяем на его окончание
     $num = 15;
     if ($count-$indexStart < 15) {
         $num = $count-$indexStart;
     }
 
-
+// формируем тело запроса 
     $filesToAnalize = array();
     for ($j = 0; $j <$num; $j++) {
 
@@ -166,7 +167,7 @@ for ($i = 0; $i < ceil($count/15);$i++) {
             }';
 
 
-
+// отправка в гугл 
 
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $cvurl);
@@ -187,7 +188,7 @@ for ($i = 0; $i < ceil($count/15);$i++) {
 
     curl_close($curl);
 
-
+// парсим ответ от гугл 
     $jsonObject = $JSON->decode($json_response);
 
     $jsonResponseObject = $jsonObject->{"responses"};
@@ -197,7 +198,7 @@ for ($i = 0; $i < ceil($count/15);$i++) {
         $file = $filesToAnalize[$fa];
 
 
-
+// получаем теги 
         $labelAnotations = $jsonResponseObject[$fa]->{"labelAnnotations"};
 
         $labelsArray = array();
@@ -206,9 +207,13 @@ for ($i = 0; $i < ceil($count/15);$i++) {
         }
 
         $labelString = implode(",",$labelsArray);
-
+// если анализированный кадр это изображение то у него будет отдельный файл 
+// смысл в том что на отдельные изобрежния создается отдельно файл с описанием 
+// на видео же создается только один файл ( не смотря на то что изображений из этого видео куда больше ) 
         if (file_exists($file.".txt")) {
             // image
+            
+            // алгоритм отправки данных в базу если это изображение 
             $fileData = file_get_contents($file.".txt");
             $fileDataJSON = $JSON->decode($fileData);
 
@@ -223,6 +228,9 @@ for ($i = 0; $i < ceil($count/15);$i++) {
 
             unlink($file);
         }else {
+            
+            // алгоритм отправки в базу данных если это кадр из видео 
+            // очищаем название от номера кадра ( сохраняя его )
             $pathInfo = pathinfo($file);
             $dirname = $pathInfo["dirname"];
             $basename = $pathInfo["basename"];
@@ -244,7 +252,7 @@ for ($i = 0; $i < ceil($count/15);$i++) {
                 $dataFile = file_get_contents($dataFilePath);
 
                 $dataFileJSON = $JSON->decode($dataFile);
-
+// отправляем данные в базу 
                 $result = sendToBaseLabels($labelString,$frameIndex,0,$dataFileJSON->{"userID"},$dataFileJSON->{"idInBase"});
 
                 if (!$result["result"]) {
