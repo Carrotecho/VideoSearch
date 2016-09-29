@@ -53,7 +53,7 @@ $server->disconnect();
 
 
 
-
+// получаем файлы с устройства и создаем для них данные 
 function pushFiles() {
     /* @var Server $server */
     global $server;
@@ -71,17 +71,17 @@ function pushFiles() {
     $userAPI = new UserAPI($server);
 
 
-
+// ассес и рефрешь токен авторизации пользователя 
     $accessToken  = $_POST["accessToken"];
     $refreshToken = $_POST["refreshToken"];
 
     unset($_POST["accessToken"]);
     unset($_POST["refreshToken"]);
 
-
+// получачем информацию о пользователе
     $result = $userAPI->getUserInfoByToken_local($accessToken);
 
-
+// возможно ассес токен устарел поэтому мы опрашиваем рефрешь токен 
     if (!$result["result"]) {
 
         $result = $userAPI->refreshToken_local($refreshToken,null,null);
@@ -89,30 +89,35 @@ function pushFiles() {
 
         $accessToken = $result["data"]["access_token"];
         $result = $userAPI->getUserInfoByToken_local($accessToken);
+        
+        // если данные авторизации не верны мы возвращаем ошибку 
         if (!$result["result"]) return $result;
     }
 
     $userID = $result["userID"];
-
+// для каждого файла ( структура генерируется на клиенской стороне ) мы проходим алгоритм формирования данных 
     foreach($_POST as $key=>$value)
     {
-
+// получаем либо путь либо локальный идентификатор 
         $fileName = $value["url"];
+        // позиция в которой был сделан медиа объект
         $location = $value["location"];
-
+// флаг говорящий нам о том локальный идентификатор это или реальный путь до файла 
         $isLocalIdentifer = $value["isLocalIdentifer"];
         $typeID = $value["typeID"];
 
-
+// опрашиваем базу данных на наличие такого ресурса в базе 
         $result = $server->select("SELECT ID FROM filesNames WHERE nameFile=? AND userID=?",$fileName,$userID);
         if (!$result["result"]) {
             return $result;
         }else {
+            // в случае если нет добавляем файл в базу
             $data = $result["data"];
             if (!count($data)) {
                 // need insert new file name
                 $result = $server->insert("INSERT INTO filesNames (nameFile,userID,location,type,isLocalIdentifer) VALUES(?,?,?,?,?)",$fileName,$userID,$location,$typeID,$isLocalIdentifer);
                 if (!$result["result"]) return $result;
+                // получаем айди в базе данных 
                 $fileNameID = $result["data"];
             }else {
                 $fileNameID = $data[0]["ID"];
@@ -120,9 +125,9 @@ function pushFiles() {
         }
 
 
-
+// указываем путь в который будет сохранен файл с описанием ресурса 
         $target_path = "uploads/userID".$userID.'/';
-
+// проверка на папку ( избежание ошибки наличия файла в папке uploads с именем пользователя ( старая затычка на ошибки кода, уже не актуально ))
         if (!is_dir($target_path)) {
             if (false === @mkdir($target_path, 0777, true)) {
                 return array("result"=>false,"data"=>"cant create dir");
@@ -131,12 +136,15 @@ function pushFiles() {
 
         $target_path = $target_path . basename( $_FILES[$key]['name']);
 
-
+// сохраняем сам медиа файл и его описание 
         if(move_uploaded_file($_FILES[$key]['tmp_name'], $target_path)) {
 
             $dataTOTxt = [];
+            // айди файла в базе
             $dataTOTxt["idInBase"] = $fileNameID;
+            // путь до файла 
             $dataTOTxt["filePath"] = $fileName;
+            // айди пользователя кому принадлежит этот файл 
             $dataTOTxt["userID"]   = $userID;
 
             file_put_contents($target_path.".txt",json_encode($dataTOTxt));
@@ -145,14 +153,14 @@ function pushFiles() {
         }
 
     }
-
+// все хорошо 
     return array("result"=>true,"data"=>"success uploaded");
 
 
 
 }
 
-
+// дебаг метод 
 function testAuth() {
     // and question )
     /* @var Server $server */
@@ -210,14 +218,14 @@ HAVING count(*) = 3;',$tag1,$tag2,$tag3);
 }
 
 
-
+// регистрация пользователя по введеным данным
 function registerUser() {
     /* @var Server $server */
     global $server;
     $server->connect();
     /* @var UserAPI $userAPI */
     $userAPI = new UserAPI($server);
-
+// вспомогательный класс для работы с пользователями
 
 
     $userName = $_GET["login"];
@@ -225,7 +233,7 @@ function registerUser() {
     $result = $userAPI->setUser_local($userName,$password);
     return $result;
 }
-
+// авторизиция пользователя
 function auth() {
     /* @var Server $server */
     global $server;
@@ -244,7 +252,7 @@ function auth() {
 
 
 
-
+// метод поиска тегов 
 function searchTag() {
     /* @var Server $server */
     global $server;
@@ -255,7 +263,7 @@ function searchTag() {
     $userAPI = new UserAPI($server);
 
 
-
+// валидируем пользователя 
     $accessToken  = $_GET["accessToken"];
     $refreshToken = $_GET["refreshToken"];
     $result = $userAPI->getUserInfoByToken_local($accessToken);
@@ -280,7 +288,8 @@ function searchTag() {
     $fileNameID = -1;
 
 
-
+// правило поиска OR/AND или None
+    // находим группу совпадающую по фильтру 
     if (strcmp($rule,"None") === 0) {
         $result = $server->select("SELECT INDEXGROUP FROM groupLabels WHERE tag=?",$labels);
     }else if (strcmp($rule,"OR") === 0) {
@@ -309,7 +318,7 @@ function searchTag() {
 
     }
 
-
+// по найденой группе получаем данные о роликах и кадрах 
     if (!$result["result"]) {
         return $result;
     }else {
@@ -368,7 +377,8 @@ function searchTag() {
 
 
 
-
+// вот тут происходит группировка кадров в блоки 
+                // к примеру чтобы система знала что найденный тег распологается в промежутки определенного времени в ролике 
                 if ($indexFrame == $saver[$_nm]["lastIndexFrame"]+1 || $type == 1) {
 
 
@@ -442,7 +452,7 @@ function searchTag() {
 
 
 
-
+// сохраняем найденные теги через гугл в базу данных 
 function sendToBaseLabels($labels,$indexFrame,$time,$userID,$fileNameID) {
     /* @var Server $server */
     global $server;
@@ -450,7 +460,7 @@ function sendToBaseLabels($labels,$indexFrame,$time,$userID,$fileNameID) {
     $server->connect();
 
 
-
+// опрашиваем базу на наличие уже такой группы если нет добавляем новую 
     $result = $server->select("SELECT ID FROM uniqueGroups WHERE tags=?",$labels);
     if (!$result["result"]) {
         return $result;
@@ -473,7 +483,7 @@ function sendToBaseLabels($labels,$indexFrame,$time,$userID,$fileNameID) {
             $groupIDLabels = $data[0]["ID"];
         }
     }
-
+// добавляем кадры с ролика или картинки в базу данных с айди группой тегов 
     $message = "";
     $result = $server->select("SELECT ID FROM frameData WHERE IDGROUP=? AND INDEXFRAME=? AND indexFile=? AND userID=?",$groupIDLabels,$indexFrame,$fileNameID,$userID);
     if (!$result["result"]) {
