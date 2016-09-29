@@ -27,6 +27,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+    // адресс сервера с которым работает клиент 
     serverPath = @"http://easyprogerdeveloper1.com.mastertest.ru/";
     
     //serverPath = @"http://192.168.200.2/videoSearch/http/";
@@ -42,7 +43,7 @@
     //
     
     
-    
+    // востанавлиаем сохранненые данные о авторизации 
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     self.accessToken = [[defaults objectForKey:ACCESS_TOKEN] mutableCopy];
     self.refreshToken = [[defaults objectForKey:REFRESH_TOKEN] mutableCopy];
@@ -57,13 +58,13 @@
     
     [self checkAuth];
 }
-
+// выход из системы
 -(IBAction)logout:(id)sender {
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     
     self.accessToken = nil;
     self.refreshToken = nil;
-    
+    // обнуление в хранилище данных о авторизации 
     [defaults setObject:self.accessToken forKey:ACCESS_TOKEN];
     [defaults setObject:self.refreshToken forKey:REFRESH_TOKEN];
     
@@ -71,7 +72,7 @@
     
     [self checkAuth];
 }
-
+// коллбек удачной авторизации 
 -(void)authComplete:(NSString *)accessToken refreshToken:(NSString *)refreshToken userName:(NSString*)userName {
     if (authWindow) {
         [authWindow dismissViewControllerAnimated:YES completion:nil];
@@ -84,7 +85,7 @@
     
     self.accessToken = accessToken;
     self.refreshToken = refreshToken;
-
+// сохранение авторизационных данных 
     [defaults setObject:accessToken forKey:ACCESS_TOKEN];
     [defaults setObject:refreshToken forKey:REFRESH_TOKEN];
     
@@ -95,7 +96,7 @@
     
     
 }
-
+// открытие окна авторизации 
 -(void)authWindow {
     
     authWindow = [[AuthWindow alloc] initWithNibName:@"AuthWindow" bundle:nil];
@@ -107,7 +108,7 @@
 }
 
 
-
+// проверка на авторизованность 
 -(void)checkAuth {
     
     
@@ -124,7 +125,7 @@
     AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
     
-    
+    // отправка запроса на авторизацию
     NSURL *URL = [NSURL URLWithString:[serverPath stringByAppendingFormat:@"videoSearch.php?request=testAuth&accessToken=%@&refreshToken=%@",self.accessToken,self.refreshToken]];
     NSURLRequest *request = [NSURLRequest requestWithURL:URL];
     
@@ -197,7 +198,7 @@
 
 
 
-
+// кнопка выбора файла из библиотеки пользователя 
 -(IBAction)choiseVideo:(id)sender {
     
     
@@ -263,7 +264,7 @@
 
 
 #pragma mark - GMImagePickerControllerDelegate
-
+// колбек пикера медиа данных 
 - (void)assetsPickerController:(GMImagePickerController *)picker didFinishPickingAssets:(NSArray *)assetArray
 {
     [picker.presentingViewController dismissViewControllerAnimated:YES completion:nil];
@@ -279,7 +280,7 @@
         dataToPushOnServer = [[NSMutableDictionary alloc] init];
     }
     
-    
+    // количество выбранных файлов
     numProcessFile = assetArray.count;
     
   
@@ -287,6 +288,9 @@
     self.view.userInteractionEnabled = NO;
     
     progressView.hidden = NO;
+    
+    
+    // проходим по каждому и получаем локальный идентификатор ресурса 
     
     for (int i = 0; i < assetArray.count; i++) {
         PHAsset*asset = [assetArray objectAtIndex:i];
@@ -307,14 +311,14 @@
                 });
                 
             };
-            
+// запрашиваем данные о ресурсе ( видео файл )           
             [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:options resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
                 NSString*location = @"";
                 if (asset.location && asset.location.description) {
                     location = asset.location.description;
                 }
                 
-
+// после удачного получения локального идентификаотра мы сжимаем видео ресурс 
                 [self compressVideo:avasset location:location urlToPlay:asset.localIdentifier type:asset.mediaType isLocalIdentifer:1];
             }];
             
@@ -329,7 +333,7 @@
                     progressView.progress = progress;
                 });
             };
-            
+// запрашиваем данные о ресурсе ( изображение )             
             [asset requestContentEditingInputWithOptions:options completionHandler:^(PHContentEditingInput * _Nullable contentEditingInput, NSDictionary * _Nonnull info) {
                 
                 NSURL *urlToResource = contentEditingInput.fullSizeImageURL;
@@ -345,7 +349,7 @@
                     location = asset.location.description;
                 }
                 
-                
+ // сжимаем изображение                
                 [self compressImage:displaySizeImage urlToResource:urlToResource location:location urlToPlay:asset.localIdentifier type:asset.mediaType isLocalIdentifer:1];
                 
             }];
@@ -371,7 +375,7 @@
         dataToPushOnServer = [[NSMutableDictionary alloc] init];
     }
     
-    
+// разбиваем путь для получения ссылок     
     NSMutableArray*paths = [NSMutableArray arrayWithArray:[path.text componentsSeparatedByString:@"&&&"]];
     
         
@@ -384,7 +388,9 @@
     
     progressView.hidden = NO;
     progressView.progress = 0;
-    
+
+
+// скачиваем каждый ресурс в локальное хранилеще 
     for (int i = 0; i < paths.count; i++) {
         NSString*pathFile = [paths objectAtIndex:i];
         
@@ -422,7 +428,7 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 progressView.progress = 1.0;
             });
-            
+            // пережимаем ресурс 
             NSString*extension = [[[filePath lastPathComponent] pathExtension] lowercaseString];
             if ([extension isEqualToString:@"mp4"] || [extension isEqualToString:@"mov"]) {
                 
@@ -456,13 +462,13 @@
 
 -(void)compressImage:(UIImage*)displaySizeImage urlToResource:(NSURL*)urlToResource location:(NSString*)location urlToPlay:(NSString*)urlToPlay type:(int)type isLocalIdentifer:(int)isLocalIdentifer {
    
-    
+    // пережимаем изображение 
     if (!urlToResource || !displaySizeImage) {
         numProcessFile--;
         [self preocessFileEnd];
         return;
     }
-    
+    // получаем путь до ресурса
     NSString* documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
     NSString*tmpName = [urlToResource lastPathComponent];
@@ -474,6 +480,8 @@
     float delta = originalSize.width/320.0;
     CGSize newSize = CGSizeMake(320.0, originalSize.height/delta);
     
+// пержимаем в новое разрешение изображение 
+
     UIGraphicsBeginImageContext( newSize );
     [displaySizeImage drawInRect:CGRectMake(0,0,newSize.width,newSize.height)];
     UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -484,7 +492,7 @@
     [pngData writeToFile:myDocumentPath atomically:YES];
     
     
-    
+    // сохраняем данные для отправки на сервер
     [dataToPushOnServer setObject:@{
                                     @"isLocalIdentifer":[NSNumber numberWithInt:isLocalIdentifer],
                                     @"typeID":[NSNumber numberWithInt:type],
@@ -497,7 +505,7 @@
     [self preocessFileEnd];
 }
 
-
+// пережимаем видео 
 -(void)compressVideo:(AVAsset*)avasset  location:(NSString*)location urlToPlay:(NSString*)urlToPlay type:(int)type isLocalIdentifer:(int)isLocalIdentifer {
     AVURLAsset*urlAsset = (AVURLAsset*)avasset;
     
@@ -512,7 +520,7 @@
         [self preocessFileEnd];
         return;
     }
-    
+    // получаем путь по которму сохранили видео 
     AVAssetExportSession *exportSession = [[AVAssetExportSession alloc] initWithAsset:urlAsset presetName:AVAssetExportPresetLowQuality];
     NSString* documentsDirectory=     [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
@@ -525,6 +533,8 @@
     
     NSLog(@"%@",[url absoluteString]);
     
+// если вдруг пережимали уже такое видео удаляем предидущий вариант 
+
     //Check if the file already exists then remove the previous file
     if ([[NSFileManager defaultManager]fileExistsAtPath:myDocumentPath])
     {
@@ -542,7 +552,7 @@
     exportSession.shouldOptimizeForNetworkUse = YES;
     
     
-    
+    // пережимаем 
     [exportSession exportAsynchronouslyWithCompletionHandler:^{
         switch ([exportSession status])
         {
@@ -560,7 +570,7 @@
                 break;
             case AVAssetExportSessionStatusCompleted:
             {
-                
+                // если видео пережалось удачно сохраняем данные для отправки на сервер 
                 [dataToPushOnServer setObject:@{
                                                 @"isLocalIdentifer":[NSNumber numberWithInt:isLocalIdentifer],
                                                 @"typeID":[NSNumber numberWithInt:type],
@@ -614,14 +624,14 @@
 
 
 
-
+// отправка данных на сервер 
 -(void)readyToSendData:(NSMutableDictionary*)dataToSend {
     progressView.progress = 0.0;
     
     NSString *urlString=[NSString stringWithFormat:@"%@", [serverPath stringByAppendingString:@"videoSearch.php"]];
     NSLog(@"url=== %@", urlString);
 
-    
+    // создаем массив для сервера 
     NSMutableDictionary*parametrs = [NSMutableDictionary dictionaryWithDictionary:dataToSend];
     
     [parametrs setObject:@"pushFiles" forKey:@"request"];
@@ -631,7 +641,7 @@
     
     
     NSMutableURLRequest *request = [[AFJSONRequestSerializer serializer] multipartFormRequestWithMethod:@"POST" URLString:urlString parameters:parametrs constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
-        
+        // создаем запрос для сервера 
         for (int i = 0; i < [[dataToSend allKeys] count]; i++) {
             
             NSString*key = [[dataToSend allKeys] objectAtIndex:i];
@@ -668,7 +678,9 @@
     AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
     
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
-    
+
+// отправляем данные 
+
     NSURLSessionUploadTask *uploadTask;
     uploadTask = [manager
                   uploadTaskWithStreamedRequest:request
@@ -698,7 +710,7 @@
                           NSLog(@"%@",string);
                           //
                           
-                          
+// получаем данные для удаления темповых ресурсов 
                           for (int i = 0; i < [[dataToSend allKeys] count]; i++) {
                               
                               NSString*key = [[dataToSend allKeys] objectAtIndex:i];
@@ -715,6 +727,9 @@
                               
                               NSString *filePath = [documentsPath stringByAppendingPathComponent:fileNamePush];
                               NSError *error;
+                              
+// подчищаем конвертированные или скаченные ресурсы 
+                              
                               BOOL success = [fileManager removeItemAtPath:filePath error:&error];
                               if (!success) {
                                   NSLog(@"%@",error);
@@ -742,7 +757,7 @@
 
 
 
-
+// метод отображения тегов 
 -(IBAction)showTag:(id)sender {
     
        
@@ -754,7 +769,7 @@
     NSURL *URL = [NSURL URLWithString:[serverPath stringByAppendingFormat:@"videoSearch.php?request=searchTag&accessToken=%@&refreshToken=%@&labels=%@&rule=%@",self.accessToken,self.refreshToken,[tagToShow.text lowercaseString],[ruleSearching titleForSegmentAtIndex:[ruleSearching selectedSegmentIndex]]]];
     
     NSURLRequest *request = [NSURLRequest requestWithURL:URL];
-    
+    // осуществляем запрос до сервера на получение ресурсво по тегам 
     NSURLSessionDataTask *dataTask = [manager dataTaskWithRequest:request completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
         if (error) {
             NSLog(@"Error: %@", error);
@@ -777,7 +792,7 @@
             
             Boolean result = [[json objectForKey:@"result"] boolValue];
             if (result) {
-                
+                // если результат запроса успешный отображаем его 
                 [self analyzeResultsShowTag:responseObject];
                 
             }else {
@@ -800,7 +815,7 @@
 }
 
 
-
+// отображение ресурсов по найденным тегам
 -(void)analyzeResultsShowTag:(NSData*)data {
   
     dispatch_async(dispatch_get_main_queue(), ^{
