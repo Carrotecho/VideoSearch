@@ -104,6 +104,7 @@ function pushFiles() {
         $location = $value["location"];
 // флаг говорящий нам о том локальный идентификатор это или реальный путь до файла 
         $isLocalIdentifer = $value["isLocalIdentifer"];
+// локальный или удаленный источник 
         $typeID = $value["typeID"];
 
 // опрашиваем базу данных на наличие такого ресурса в базе 
