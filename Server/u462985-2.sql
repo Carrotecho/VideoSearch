@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 
 --
 -- Структура таблицы `filesNames`
---
+-- хранение имен файлов 
 
 CREATE TABLE IF NOT EXISTS `filesNames` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -40,7 +40,16 @@ CREATE TABLE IF NOT EXISTS `filesNames` (
 
 --
 -- Структура таблицы `frameData`
---
+-- храним все кадры от всех пользователей из всех ресурсов а так же изображения
+
+-- ID айди записи 
+-- IDGROUP айди группы тегов из базы grouplabels
+-- INDEXFRAME индекс кадра ( в случае с изображением 0 )
+-- indexFile айди файла из filenames 
+-- time не используется 
+-- userID айди пользователя кому принадлежжит ресурс 
+
+
 
 CREATE TABLE IF NOT EXISTS `frameData` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -56,7 +65,11 @@ CREATE TABLE IF NOT EXISTS `frameData` (
 
 --
 -- Структура таблицы `groupLabels`
---
+-- группы тегов ( уникальные )
+-- ID айди записи 
+-- INDEXGROUP айди группы 
+-- tag тег 
+-- score очки тега то есть на сколько он вероятен 
 
 CREATE TABLE IF NOT EXISTS `groupLabels` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -70,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `groupLabels` (
 
 --
 -- Структура таблицы `oauth_access_tokens`
---
+-- хранение ассестокенов пользователей 
 
 CREATE TABLE IF NOT EXISTS `oauth_access_tokens` (
   `access_token` varchar(40) NOT NULL,
@@ -85,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `oauth_access_tokens` (
 
 --
 -- Структура таблицы `oauth_authorization_codes`
---
+-- не используется 
 
 CREATE TABLE IF NOT EXISTS `oauth_authorization_codes` (
   `authorization_code` varchar(40) NOT NULL,
@@ -101,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `oauth_authorization_codes` (
 
 --
 -- Структура таблицы `oauth_clients`
---
+-- не используется 
 
 CREATE TABLE IF NOT EXISTS `oauth_clients` (
   `client_id` varchar(80) NOT NULL,
@@ -117,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `oauth_clients` (
 
 --
 -- Структура таблицы `oauth_jwt`
---
+-- не испольщзуется
 
 CREATE TABLE IF NOT EXISTS `oauth_jwt` (
   `client_id` varchar(80) NOT NULL,
@@ -130,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `oauth_jwt` (
 
 --
 -- Структура таблицы `oauth_refresh_tokens`
---
+-- хранение рефреш токенов пользователей 
 
 CREATE TABLE IF NOT EXISTS `oauth_refresh_tokens` (
   `refresh_token` varchar(40) NOT NULL,
@@ -145,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `oauth_refresh_tokens` (
 
 --
 -- Структура таблицы `oauth_scopes`
---
+-- не используется
 
 CREATE TABLE IF NOT EXISTS `oauth_scopes` (
   `scope` text,
@@ -156,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `oauth_scopes` (
 
 --
 -- Структура таблицы `oauth_users`
---
+-- хранение пользователей 
 
 CREATE TABLE IF NOT EXISTS `oauth_users` (
   `username` varchar(255) NOT NULL,
@@ -171,7 +184,7 @@ CREATE TABLE IF NOT EXISTS `oauth_users` (
 
 --
 -- Структура таблицы `uniqueGroups`
---
+-- хранение уникальных групп по строкам 
 
 CREATE TABLE IF NOT EXISTS `uniqueGroups` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -183,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `uniqueGroups` (
 
 --
 -- Структура таблицы `Users`
---
+-- хранение пользователей 
 
 CREATE TABLE IF NOT EXISTS `Users` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
